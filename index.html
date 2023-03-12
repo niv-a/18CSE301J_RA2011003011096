@@ -5,14 +5,33 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>18CSE301J_RA2011003011096</title>
+    <style>
+      body {
+        background-color: rgb(188, 217, 242);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      #my_d3graph {
+        padding: 30px;
+      }
+    </style>
   </head>
   <body>
     <h1>18CSE301J_RA2011003011096</h1>
+
+    <div>
+      <h2>Assignment 1</h2>
+      <embed src="IV RA2011003011096 (1).pdf" width="700" height="700" />
+    </div>
+
     <div
       class="tableauPlaceholder"
       id="viz1677562455101"
       style="position: relative"
     >
+      <h2>Assignment 2 : Tableau</h2>
       <noscript
         ><a href="#"
           ><img
@@ -60,13 +79,176 @@
         "https://public.tableau.com/javascripts/api/viz_v1.js";
       vizElement.parentNode.insertBefore(scriptElement, vizElement);
     </script>
+    <div id="geph">
+      <style>
+        #geph {
+          background-color: rgb(188, 217, 242);
+          /* display: flex; */
+          align-items: center;
+          justify-content: center;
+          /* flex-direction: column; */
+        }
+      </style>
+      <h2>Assignment 3: Using Gephi</h2>
+      <h3>Visualise Blockchain Transactions of 'Floor' token</h3>
+      <img src="./gephi/gephi2.png" alt="#" width="700" height="700" />
+      <img src="./gephi/gephi3.png" alt="#" width="700" height="700" />
+      <img src="./gephi/gephi4.png" alt="#" width="700" height="700" />
+      <embed src="./gephi/gephi-merged.pdf" width="700" height="700" />
+    </div>
     <div>
-      <h1>Using Gephi</h1>
-      <h2>Visualise Blockchain Transactions of 'Floor' token</h2>
-      <img src="gephi2.png" alt="#" width="700" height="700" />
-      <img src="gephi3.png" alt="#" width="700" height="700" />
-      <img src="gephi4.png" alt="#" width="700" height="700" />
-      <embed src="gephi-merged.pdf" width="700" height="700" />
+      <h1>Using D3 JS</h1>
+      <h2>Visualising Global Migration</h2>
+      <div id="my_d3graph"></div>
+      <script src="http://d3js.org/d3.v5.min.js"></script>
+      <script>
+        var margin = { top: 10, right: 10, bottom: 10, left: 10 },
+          width = 600 - margin.left - margin.right,
+          height = 600 - margin.top - margin.bottom,
+          innerRadius = Math.min(width, height) * 0.35, //35% of smallest measurement
+          outerRadius = innerRadius * 1.1; //110% of innerradius
+
+        var svg = d3
+          .select("#my_d3graph")
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr(
+            "transform",
+            "translate(" + margin.left + "," + margin.top + ")"
+          )
+          .append("g")
+          .attr("class", "chordgraph")
+          .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+        d3.csv("./d3/Migrants.csv").then(function (d) {
+          var firstColumn = "countries";
+
+          //store column names
+          var fc = d.map(function (d) {
+              return d[firstColumn];
+            }),
+            fo = fc.slice(0),
+            maxtrix_size = Object.keys(d[0]).length - 1 + fc.length,
+            matrix = [];
+
+          //Create an empty square matrix of zero placeholders, the size of the data
+          for (var i = 0; i < maxtrix_size; i++) {
+            matrix.push(
+              new Array(maxtrix_size + 1).join("0").split("").map(parseFloat)
+            );
+          }
+
+          //go through the data and convert all to numbers except "first_column"
+          for (var i = 0; i < d.length; i++) {
+            var j = d.length; //counter
+
+            for (var prop in d[i]) {
+              if (prop != firstColumn) {
+                fc.push(prop);
+                matrix[i][j] = +d[i][prop];
+                matrix[j][i] = +d[i][prop];
+                j++;
+              }
+            }
+          }
+
+          //set color scale. More color options: https://github.com/d3/d3-scale-chromatic
+          // var color = d3.scaleOrdinal(d3.schemeCategory10);
+          var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+          // var color = d3.scaleOrdinal().range(d3.schemeCategory20);
+
+          //d3 chord generator
+          var chord = d3.chord().padAngle(0.01).sortSubgroups(d3.descending);
+
+          //apply the matrix
+          var chords = chord(matrix);
+
+          //each ribbon generator
+          var ribbon = d3.ribbon().radius(innerRadius);
+
+          //outer rim arc
+          var arc = d3
+            .arc()
+            .innerRadius(innerRadius)
+            .outerRadius(innerRadius + 20);
+
+          //add each of the groupings for outer rim arcs
+          var group = svg
+            .append("g")
+            .selectAll("g")
+            .data(chords.groups)
+            .enter()
+            .append("g");
+
+          //add each outer rim arc path
+          group
+            .append("path")
+            .attr("fill", function (d) {
+              return d.index + 1 > fo.length ? color(d.index) : "#ccc";
+            })
+            .attr("stroke", function (d) {
+              return color(d.index);
+            })
+            .attr("d", arc)
+            .style("cursor", "pointer")
+            .on("mouseover", function (d, i) {
+              ribbons.classed("fade", function (d) {
+                return d.source.index != i && d.target.index != i;
+              });
+            });
+
+          //add each ribbon
+          var ribbons = svg
+            .append("g")
+            .attr("fill-opacity", 0.67)
+            .selectAll("path")
+            .data(chords)
+            .enter()
+            .append("path")
+            .attr("d", ribbon)
+            .attr("fill", function (d) {
+              return color(d.target.index);
+            })
+            .attr("stroke", function (d) {
+              return d3.rgb(color(d.target.index)).darker();
+            });
+
+          //add the text labels
+          group
+            .append("text")
+            .each(function (d) {
+              return (d.angle = (d.startAngle + d.endAngle) / 2);
+            })
+            .attr("dy", ".35em")
+            .attr("class", "text")
+            .style("pointer-events", "none")
+            .attr("text-anchor", function (d) {
+              return d.angle > Math.PI ? "end" : "start";
+            })
+            .attr("transform", function (d, i) {
+              console.log(fc[i], d);
+              //rotate each label around the circle
+              return (
+                "rotate(" +
+                ((d.angle * 180) / Math.PI - 90) +
+                ")" +
+                "translate(" +
+                (outerRadius + 10) +
+                ")" +
+                (d.angle > Math.PI ? "rotate(180)" : "")
+              );
+            })
+            .text(function (d, i) {
+              //set the text content
+              return fc[i];
+            })
+            .style("font-family", "Segoe UI")
+            .style("font-size", "10px");
+        });
+      </script>
     </div>
   </body>
 </html>
