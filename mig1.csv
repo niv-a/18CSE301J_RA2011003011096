@@ -1,5 +1,4 @@
-Year,continent ,"Sort
-order","Major area, region, country or area of destination",Code,Total,Other South,Other North
+Year,continent ,order,country,Code,Total,Other South,Other North
 1990,Eastern Africa,1990024,Burundi,108,"3,33,110","50,676","8,943"
 1990,Eastern Africa,1990025,Comoros,174,"14,079",847,672
 1990,Eastern Africa,1990026,Djibouti,262,"1,22,221","5,484","1,827"
